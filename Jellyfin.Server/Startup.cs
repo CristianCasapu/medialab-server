@@ -186,6 +186,12 @@ namespace Jellyfin.Server
 
                 mainApp.UseMiddleware<ResponseTimeMiddleware>();
 
+                mainApp.Use((context, next) =>
+                {
+                    context.Response.Headers[Medialab.MedialabEdition.HeaderName] = Medialab.MedialabEdition.Revision;
+                    return next(context);
+                });
+
                 mainApp.UseWebSockets();
 
                 mainApp.UseResponseCompression();
