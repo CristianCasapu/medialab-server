@@ -794,6 +794,10 @@ namespace Emby.Server.Implementations.Library
         {
             var originalRuntime = mediaSource.RunTimeTicks;
 
+            // medialab: a live source may ask for a shorter analysis (e.g. it starts on a keyframe); honoured below
+            // only when the probe found the real stream indexes.
+            var requestedAnalyzeDurationMs = mediaSource.AnalyzeDurationMs;
+
             var now = DateTime.UtcNow;
 
             MediaInfo mediaInfo = null;
@@ -934,11 +938,29 @@ namespace Emby.Server.Implementations.Library
 
             if (isLiveStream)
             {
-                mediaSource.AnalyzeDurationMs = 3000;
+                mediaSource.AnalyzeDurationMs = LiveAnalyzeDurationMs(requestedAnalyzeDurationMs, mediaSource.MediaStreams);
             }
 
             // Try to estimate this
             mediaSource.InferTotalBitrate(true);
+        }
+
+        /// <summary>
+        /// The ffmpeg analyze duration for a live stream after probing: 3000 ms (upstream), unless the source asked
+        /// for less and the probe found the real stream indexes, so ffmpeg does not have to discover the streams.
+        /// </summary>
+        /// <param name="requestedMs">The analyze duration set by the source before probing.</param>
+        /// <param name="streams">The probed streams.</param>
+        /// <returns>The analyze duration in milliseconds.</returns>
+        internal static int LiveAnalyzeDurationMs(int? requestedMs, IReadOnlyList<MediaStream> streams)
+        {
+            var avStreams = streams?.Where(i => i.Type is MediaStreamType.Video or MediaStreamType.Audio).ToList();
+            if (requestedMs is > 0 and < 3000 && avStreams is { Count: > 0 } && avStreams.All(i => i.Index >= 0))
+            {
+                return requestedMs.Value;
+            }
+
+            return 3000;
         }
 
         public Task<Tuple<MediaSourceInfo, IDirectStreamProvider>> GetLiveStreamWithDirectStreamProvider(string id, CancellationToken cancellationToken)
