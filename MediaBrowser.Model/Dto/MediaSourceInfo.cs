@@ -116,6 +116,18 @@ namespace MediaBrowser.Model.Dto
 
         public int? AnalyzeDurationMs { get; set; }
 
+        /// <summary>
+        /// Gets or sets the HLS segment length, in seconds, the source prefers when a live stream is transcoded
+        /// (medialab). Used only when the client does not ask for one; null keeps the server default.
+        /// </summary>
+        public int? LiveSegmentLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of segments to wait for before the live playlist is returned (medialab).
+        /// Used only when the client does not ask for one; null keeps the server default.
+        /// </summary>
+        public int? LiveMinSegments { get; set; }
+
         [JsonIgnore]
         public TranscodeReason TranscodeReasons { get; set; }
 

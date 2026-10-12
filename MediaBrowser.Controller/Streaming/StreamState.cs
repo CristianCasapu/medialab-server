@@ -80,6 +80,11 @@ public class StreamState : EncodingJobInfo, IDisposable
                 return Request.SegmentLength.Value;
             }
 
+            if (MediaSource?.IsInfiniteStream == true && MediaSource.LiveSegmentLength is >= 1 and <= 10)
+            {
+                return MediaSource.LiveSegmentLength.Value;
+            }
+
             if (EncodingHelper.IsCopyCodec(OutputVideoCodec))
             {
                 var userAgent = UserAgent ?? string.Empty;
@@ -115,6 +120,11 @@ public class StreamState : EncodingJobInfo, IDisposable
             if (Request.MinSegments.HasValue)
             {
                 return Request.MinSegments.Value;
+            }
+
+            if (MediaSource?.IsInfiniteStream == true && MediaSource.LiveMinSegments is >= 1 and <= 10)
+            {
+                return MediaSource.LiveMinSegments.Value;
             }
 
             return SegmentLength >= 10 ? 2 : 3;
