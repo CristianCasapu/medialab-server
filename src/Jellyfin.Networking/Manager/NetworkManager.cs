@@ -459,6 +459,12 @@ public class NetworkManager : INetworkManager, IDisposable
 
                 _remoteAddressFilter = remoteAddressFilter;
             }
+            else
+            {
+                // An emptied filter must not keep the previous entries: with the allowlist mode they would block
+                // every remote client (503) until the next restart.
+                _remoteAddressFilter = new List<IPNetwork>();
+            }
         }
     }
 

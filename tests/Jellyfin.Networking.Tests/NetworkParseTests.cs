@@ -445,6 +445,29 @@ namespace Jellyfin.Networking.Tests
             Assert.Equal(expectedResult, nm.ShouldAllowServerAccess(IPAddress.Parse(remoteIP)));
         }
 
+        [Fact]
+        public void HasRemoteAccess_AfterClearingTheFilter_AllowsEveryone()
+        {
+            // A blocklist entry, then the administrator empties the filter (the mode goes back to allowlist, the default)
+            var conf = new NetworkConfiguration()
+            {
+                EnableIPv4 = true,
+                RemoteIPFilter = ["198.51.100.77"],
+                IsRemoteIPFilterBlacklist = true
+            };
+
+            var startupConf = new Mock<IConfiguration>();
+            using var nm = new NetworkManager(NetworkParseTests.GetMockConfig(conf), startupConf.Object, new NullLogger<NetworkManager>());
+            Assert.Equal(RemoteAccessPolicyResult.RejectDueToIPBlocklist, nm.ShouldAllowServerAccess(IPAddress.Parse("198.51.100.77")));
+
+            conf.RemoteIPFilter = [];
+            conf.IsRemoteIPFilterBlacklist = false;
+            nm.UpdateSettings(conf);
+
+            Assert.Equal(RemoteAccessPolicyResult.Allow, nm.ShouldAllowServerAccess(IPAddress.Parse("86.120.5.10")));
+            Assert.Equal(RemoteAccessPolicyResult.Allow, nm.ShouldAllowServerAccess(IPAddress.Parse("198.51.100.77")));
+        }
+
         [Theory]
         [InlineData("192.168.1.209/24,-16,eth16", "192.168.1.0/24", "", "192.168.1.209")] // Only 1 address so use it.
         [InlineData("192.168.1.208/24,-16,eth16|10.0.0.1/24,10,eth7", "192.168.1.0/24", "", "192.168.1.208")] // LAN address is specified by default.
