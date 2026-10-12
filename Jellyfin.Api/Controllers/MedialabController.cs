@@ -22,4 +22,14 @@ public class MedialabController : BaseJellyfinApiController
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IReadOnlyList<string>> GetWebScripts() => Ok(WebScripts.All);
+
+    /// <summary>
+    /// Gets the links plugins add to the user menu, filtered for the signed-in user.
+    /// </summary>
+    /// <response code="200">The links (name, url, icon, adminOnly).</response>
+    /// <returns>The list of links.</returns>
+    [HttpGet("UserMenu")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<IReadOnlyList<UserMenuLink>> GetUserMenu() => Ok(UserMenu.For(User.IsInRole(Constants.UserRoles.Administrator)));
 }
