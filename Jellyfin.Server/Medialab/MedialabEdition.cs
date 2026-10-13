@@ -19,7 +19,7 @@ namespace Jellyfin.Server.Medialab
         /// The medialab revision, e.g. "12.2-ml.1".
         /// </summary>
         /// <remarks>Bumped by sync/weekly-sync.sh; the upstream AssemblyVersion stays untouched so plugin targetAbi checks keep working.</remarks>
-        public const string Revision = "12.2-ml.5";
+        public const string Revision = "12.2-ml.6";
 
         /// <summary>
         /// Capabilities added by medialab patches. Plugins read this via reflection and skip their own workarounds
