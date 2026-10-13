@@ -11,6 +11,7 @@ using Jellyfin.LiveTv.Guide;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Extensions;
 using MediaBrowser.Controller.LiveTv;
+using MediaBrowser.Controller.Medialab;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.LiveTv;
 using MediaBrowser.Model.Tasks;
@@ -49,6 +50,7 @@ public class ListingsManager : IListingsManager
         _taskManager = taskManager;
         _tunerHostManager = tunerHostManager;
         _listingsProviders = listingsProviders.ToArray();
+        _config.NamedConfigurationUpdated += OnNamedConfigurationUpdated;
     }
 
     /// <inheritdoc />
@@ -281,7 +283,27 @@ public class ListingsManager : IListingsManager
                     => string.Equals(l.Type, info.Type, StringComparison.OrdinalIgnoreCase)),
                 ProviderInfo: info))
             .Where(i => i.Provider is not null)
+            .OrderBy(i => PluginTrust.PriorityOf(i.Provider)) // medialab: the first provider with programs wins
             .ToList()!; // Already filtered out null
+
+    // medialab: guide providers from medialab plugins are listed (and used) first; the order of the others is kept.
+    private void OnNamedConfigurationUpdated(object? sender, ConfigurationUpdateEventArgs e)
+    {
+        if (!string.Equals(e.Key, "livetv", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var config = _config.GetLiveTvConfiguration();
+        var ordered = config.ListingProviders
+            .OrderBy(info => PluginTrust.PriorityOf(_listingsProviders.FirstOrDefault(l => string.Equals(l.Type, info.Type, StringComparison.OrdinalIgnoreCase))))
+            .ToArray();
+        if (!ordered.SequenceEqual(config.ListingProviders))
+        {
+            config.ListingProviders = ordered;
+            _config.SaveConfiguration("livetv", config);
+        }
+    }
 
     private async Task AddMetadata(
         IListingsProvider provider,

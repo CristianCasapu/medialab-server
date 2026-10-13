@@ -14,6 +14,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Medialab;
 using MediaBrowser.Controller.Persistence;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Controller.Subtitles;
@@ -55,7 +56,8 @@ namespace MediaBrowser.Providers.Subtitles
             _localization = localizationManager;
             _directoryService = directoryService;
             _subtitleProviders = subtitleProviders
-                .OrderBy(i => i is IHasOrder hasOrder ? hasOrder.Order : 0)
+                .OrderBy(PluginTrust.PriorityOf)
+                .ThenBy(i => i is IHasOrder hasOrder ? hasOrder.Order : 0)
                 .ToArray();
             _allowedSubtitleFormats = new HashSet<string>(
                 namingOptions.SubtitleFileExtensions.Select(e => e.TrimStart('.')),

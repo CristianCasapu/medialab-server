@@ -16,6 +16,7 @@ using MediaBrowser.Common.Extensions;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.Medialab;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Model.Configuration;
 using MediaBrowser.Model.IO;
@@ -116,10 +117,15 @@ namespace Emby.Server.Implementations.Plugins
                 }
             }
 
-            // Now load the assemblies..
-            foreach (var plugin in _plugins)
+            // Now load the assemblies.. (medialab: plugins signed by medialab first, so their services register first)
+            var trust = _plugins.ToDictionary(p => p, p => PluginTrust.CheckPlugin(p.DllFiles));
+            foreach (var plugin in _plugins.OrderBy(p => trust[p] == PluginTrustState.Verified ? 0 : 1).ToList())
             {
                 UpdatePluginSupersededStatus(plugin);
+                if (trust[plugin] == PluginTrustState.Modified)
+                {
+                    _logger.LogWarning("Plugin {Name} {Version}: the medialab signature does not match its files (changed after signing)", plugin.Name, plugin.Version);
+                }
 
                 if (plugin.IsEnabledAndSupported == false)
                 {

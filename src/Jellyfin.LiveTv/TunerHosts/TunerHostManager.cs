@@ -11,6 +11,7 @@ using Jellyfin.LiveTv.Guide;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Extensions;
 using MediaBrowser.Controller.LiveTv;
+using MediaBrowser.Controller.Medialab;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.LiveTv;
 using MediaBrowser.Model.Tasks;
@@ -52,7 +53,7 @@ public class TunerHostManager : ITunerHostManager
 
     /// <inheritdoc />
     public IEnumerable<NameIdPair> GetTunerHostTypes()
-        => _tunerHosts.OrderBy(i => i.Name).Select(i => new NameIdPair
+        => _tunerHosts.OrderBy(PluginTrust.PriorityOf).ThenBy(i => i.Name).Select(i => new NameIdPair
         {
             Name = i.Name,
             Id = i.Type
