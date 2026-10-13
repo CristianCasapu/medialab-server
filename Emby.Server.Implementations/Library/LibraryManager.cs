@@ -1753,7 +1753,7 @@ namespace Emby.Server.Implementations.Library
                 AddUserToQuery(query, query.User, allowExternalContent);
             }
 
-            return _itemRepository.GetItemList(query);
+            return FilterRequestedIdsForUser(query, _itemRepository.GetItemList(query), out _);
         }
 
         public IReadOnlyList<BaseItem> GetItemList(InternalItemsQuery query)
@@ -1898,13 +1898,13 @@ namespace Emby.Server.Implementations.Library
 
             if (query.EnableTotalRecordCount)
             {
-                return _itemRepository.GetItems(query);
+                return FilterRequestedIdsForUser(query, _itemRepository.GetItems(query));
             }
 
             return new QueryResult<BaseItem>(
                 query.StartIndex,
                 null,
-                _itemRepository.GetItemList(query));
+                FilterRequestedIdsForUser(query, _itemRepository.GetItemList(query), out _));
         }
 
         public IReadOnlyList<Guid> GetItemIds(InternalItemsQuery query)
@@ -2031,13 +2031,41 @@ namespace Emby.Server.Implementations.Library
 
             if (query.EnableTotalRecordCount)
             {
-                return _itemRepository.GetItems(query);
+                return FilterRequestedIdsForUser(query, _itemRepository.GetItems(query));
             }
 
             return new QueryResult<BaseItem>(
                 query.StartIndex,
                 null,
-                _itemRepository.GetItemList(query));
+                FilterRequestedIdsForUser(query, _itemRepository.GetItemList(query), out _));
+        }
+
+        /// <summary>
+        /// medialab: items requested by id for a user must pass the same access check as GET /Items/{id}.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="AddUserToQuery"/> limits a user's query to their libraries only when the query has no ItemIds, so
+        /// /Items?Ids= and /Users/{userId}/Items?Ids= returned items from libraries the user cannot access (the same in
+        /// Jellyfin 12.2). Parental rating and tag filters already apply in the query; library access is checked here.
+        /// </remarks>
+        private static IReadOnlyList<BaseItem> FilterRequestedIdsForUser(InternalItemsQuery query, IReadOnlyList<BaseItem> items, out int removed)
+        {
+            removed = 0;
+            if (query.User is null || query.ItemIds.Length == 0 || items.Count == 0)
+            {
+                return items;
+            }
+
+            var visible = items.Where(i => i.IsVisibleStandalone(query.User)).ToList();
+            removed = items.Count - visible.Count;
+            return removed == 0 ? items : visible;
+        }
+
+        private static QueryResult<BaseItem> FilterRequestedIdsForUser(InternalItemsQuery query, QueryResult<BaseItem> result)
+        {
+            result.Items = FilterRequestedIdsForUser(query, result.Items, out var removed);
+            result.TotalRecordCount -= removed;
+            return result;
         }
 
         private void SetTopParentIdsOrAncestors(InternalItemsQuery query, IReadOnlyCollection<BaseItem> parents)
