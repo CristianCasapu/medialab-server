@@ -171,6 +171,12 @@ namespace Emby.Server.Implementations.Updates
                 _logger.LogError(ex, "An error occurred while accessing the plugin manifest: {Manifest}", manifest);
                 return Array.Empty<PackageInfo>();
             }
+            catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+            {
+                // The HttpClient timeout elapsed. One unreachable repository must not take down the whole catalog.
+                _logger.LogError(ex, "Timed out while accessing the plugin manifest: {Manifest}", manifest);
+                return Array.Empty<PackageInfo>();
+            }
         }
 
         /// <inheritdoc />

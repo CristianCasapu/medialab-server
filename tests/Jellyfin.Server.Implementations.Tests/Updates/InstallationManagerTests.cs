@@ -58,6 +58,40 @@ namespace Jellyfin.Server.Implementations.Tests.Updates
         }
 
         [Fact]
+        public async Task GetPackages_RepositoryTimesOut_ReturnsEmpty()
+        {
+            var messageHandler = new Mock<HttpMessageHandler>();
+            messageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .Returns<HttpRequestMessage, CancellationToken>(
+                    async (_, cancellationToken) =>
+                    {
+                        // A repository that never answers.
+                        await Task.Delay(Timeout.Infinite, cancellationToken).ConfigureAwait(false);
+                        return new HttpResponseMessage();
+                    });
+
+            var http = new Mock<IHttpClientFactory>();
+            http.Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(() => new HttpClient(messageHandler.Object) { Timeout = TimeSpan.FromMilliseconds(100) });
+            var fixture = new Fixture();
+            fixture.Customize(new AutoMoqCustomization
+            {
+                ConfigureMembers = true
+            });
+            fixture.Inject(http);
+            var installationManager = fixture.Create<InstallationManager>();
+
+            PackageInfo[] packages = await installationManager.GetPackages(
+                "Unreachable",
+                "https://repo.example.invalid/manifest.json",
+                false,
+                TestContext.Current.CancellationToken);
+
+            Assert.Empty(packages);
+        }
+
+        [Fact]
         public async Task FilterPackages_NameOnly_Success()
         {
             PackageInfo[] packages = await _installationManager.GetPackages(
