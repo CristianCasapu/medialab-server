@@ -118,7 +118,7 @@ namespace Emby.Server.Implementations.Plugins
             }
 
             // Now load the assemblies.. (medialab: plugins signed by medialab first, so their services register first)
-            var trust = _plugins.ToDictionary(p => p, p => PluginTrust.CheckPlugin(p.DllFiles));
+            var trust = _plugins.ToDictionary(p => p, p => PluginTrust.CheckPlugin(p.DllFiles, p.Path));
             foreach (var plugin in _plugins.OrderBy(p => trust[p] == PluginTrustState.Verified ? 0 : 1).ToList())
             {
                 UpdatePluginSupersededStatus(plugin);

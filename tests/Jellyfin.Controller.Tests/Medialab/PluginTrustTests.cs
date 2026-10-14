@@ -62,6 +62,20 @@ public sealed class PluginTrustTests : IDisposable
     }
 
     [Fact]
+    public void UnloadedPluginIsCheckedByItsFolder()
+    {
+        // an update waiting for a restart has no DllFiles yet: its folder decides (here a stale signature)
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var dll = Path.Combine(_dir, "d.dll");
+        File.WriteAllBytes(dll, [5, 5]);
+        File.WriteAllText(dll + PluginTrust.SignatureExtension, Sign(key, [5, 5]));
+
+        Assert.Equal(PluginTrustState.Modified, PluginTrust.CheckPlugin([], _dir));
+        Assert.Equal(PluginTrustState.Unsigned, PluginTrust.CheckPlugin([], Path.Combine(_dir, "missing")));
+        Assert.Equal(PluginTrustState.Unsigned, PluginTrust.CheckPlugin([], null));
+    }
+
+    [Fact]
     public void ServerTypesAreNotMedialabPlugins()
     {
         Assert.False(PluginTrust.IsMedialab(typeof(PluginTrust)));

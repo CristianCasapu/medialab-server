@@ -58,7 +58,7 @@ public class MedialabController : BaseJellyfinApiController
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IReadOnlyList<PluginTrustInfo>> GetPluginTrust()
         => _pluginManager.Plugins
-            .Select(p => new PluginTrustInfo(p.Id, p.Version.ToString(), p.Name, PluginTrust.CheckPlugin(p.DllFiles).ToString()))
+            .Select(p => new PluginTrustInfo(p.Id, p.Version.ToString(), p.Name, PluginTrust.CheckPlugin(p.DllFiles, p.Path).ToString()))
             .ToArray();
 }
 

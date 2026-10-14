@@ -101,6 +101,24 @@ public static class PluginTrust
     }
 
     /// <summary>
+    /// Checks a plugin by its assembly list, or, when the list is empty (a plugin not loaded yet, e.g. an update waiting
+    /// for a restart), by the assemblies in its folder.
+    /// </summary>
+    /// <param name="dllFiles">The plugin's assembly paths (may be empty).</param>
+    /// <param name="pluginPath">The plugin folder.</param>
+    /// <returns>The state.</returns>
+    public static PluginTrustState CheckPlugin(IReadOnlyCollection<string> dllFiles, string? pluginPath)
+    {
+        ArgumentNullException.ThrowIfNull(dllFiles);
+        if (dllFiles.Count == 0 && !string.IsNullOrEmpty(pluginPath) && Directory.Exists(pluginPath))
+        {
+            return CheckPlugin(Directory.GetFiles(pluginPath, "*.dll", SearchOption.TopDirectoryOnly));
+        }
+
+        return CheckPlugin(dllFiles);
+    }
+
+    /// <summary>
     /// Gets a value indicating whether a type comes from a verified medialab plugin assembly.
     /// </summary>
     /// <param name="type">The type (e.g. a provider implementation).</param>
