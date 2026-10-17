@@ -13,6 +13,11 @@ public static class MedialabTv
     /// <summary>The capability id listed in MedialabEdition.Features.</summary>
     public const string Feature = "builtin-tv";
 
+    /// <summary>The admin-only user menu link to the settings page.</summary>
+    public const string AdminLinkName = "MediaLab TV – admin";
+
+    public const string AdminLinkUrl = "#/configurationpage?name=medialabtv";
+
     /// <summary>The assembly with the TV controllers (added as an MVC application part).</summary>
     public static System.Reflection.Assembly Assembly => typeof(MedialabTv).Assembly;
 
@@ -38,7 +43,10 @@ public static class MedialabTv
             log("MediaLab TV: " + ex.Message);
         }
 
-        BuiltinPages.Register(new PluginPageInfo { Name = "medialabtv", DisplayName = "MediaLab TV", EmbeddedResourcePath = "MediaLabTv.Configuration.medialabtv.html", EnableInMainMenu = true, MenuIcon = "tv" }, Assembly, Plugin.PluginId);
+        // Not in the dashboard's main menu (upstream keeps that list for plugins; its integration test expects it empty on
+        // a fresh server): administrators open the settings from an admin-only link in the user menu.
+        BuiltinPages.Register(new PluginPageInfo { Name = "medialabtv", DisplayName = "MediaLab TV", EmbeddedResourcePath = "MediaLabTv.Configuration.medialabtv.html", EnableInMainMenu = false, MenuIcon = "tv" }, Assembly, Plugin.PluginId);
+        UserMenu.Register(AdminLinkName, AdminLinkUrl, "settings", adminOnly: true);
         BuiltinPages.Register(new PluginPageInfo { Name = "medialabtvjs", EmbeddedResourcePath = "MediaLabTv.Configuration.medialabtv.js" }, Assembly, Plugin.PluginId);
         services.AddHostedService<Platform.UserMenuLink>();
         services.AddTransient<IStartupFilter, Platform.AccessPathStartupFilter>();

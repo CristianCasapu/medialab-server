@@ -40,6 +40,9 @@ public sealed class BuiltinTvTests : IDisposable
         Assert.Equal("12.2-ml.8", LicenseConfig.PluginVersion);
         Assert.Equal("MediaLab TV", Plugin.Instance!.Values().Name);
         Assert.NotNull(BuiltinPages.Find("medialabtv"));
+        Assert.False(BuiltinPages.Find("medialabtv")!.Page.EnableInMainMenu);
+        Assert.Contains(UserMenu.For(true), l => l.Url == MedialabTv.AdminLinkUrl && l.AdminOnly);
+        Assert.DoesNotContain(UserMenu.For(false), l => l.Url == MedialabTv.AdminLinkUrl);
         using var page = BuiltinPages.Open(BuiltinPages.Find("medialabtvjs")!);
         Assert.NotNull(page);
         var js = new StreamReader(page!).ReadToEnd();
