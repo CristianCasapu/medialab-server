@@ -61,4 +61,3 @@ public class MedialabController : BaseJellyfinApiController
             .Select(p => new PluginTrustInfo(p.Id, p.Version.ToString(), p.Name, PluginTrust.CheckPlugin(p.DllFiles, p.Path).ToString()))
             .ToArray();
 }
-
