@@ -7,6 +7,7 @@ using Jellyfin.Api.Attributes;
 using Jellyfin.Api.Models;
 using MediaBrowser.Common.Api;
 using MediaBrowser.Common.Plugins;
+using MediaBrowser.Controller.Medialab;
 using MediaBrowser.Model.Net;
 using MediaBrowser.Model.Plugins;
 using Microsoft.AspNetCore.Authorization;
@@ -55,6 +56,9 @@ public class DashboardController : BaseJellyfinApiController
     {
         var configPages = _pluginManager.Plugins.SelectMany(GetConfigPages).ToList();
 
+        // medialab: pages of built-in features (e.g. MediaLab TV), listed like plugin pages
+        configPages.AddRange(BuiltinPages.All.Select(b => new ConfigurationPageInfo(null, b.Page) { PluginId = b.OwnerId }));
+
         if (enableInMainMenu.HasValue)
         {
             configPages = configPages.Where(p => p.EnableInMainMenu == enableInMainMenu.Value).ToList();
@@ -79,7 +83,10 @@ public class DashboardController : BaseJellyfinApiController
         var altPage = GetPluginPages().FirstOrDefault(p => string.Equals(p.Item1.Name, name, StringComparison.OrdinalIgnoreCase));
         if (altPage is null)
         {
-            return NotFound();
+            // medialab: a page of a built-in feature
+            var builtin = BuiltinPages.Find(name);
+            var content = builtin is null ? null : BuiltinPages.Open(builtin);
+            return content is null ? NotFound() : File(content, MimeTypes.GetMimeType(builtin!.Page.EmbeddedResourcePath));
         }
 
         IPlugin plugin = altPage.Item2;

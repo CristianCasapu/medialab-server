@@ -25,6 +25,6 @@ namespace Jellyfin.Server.Medialab
         /// Capabilities added by medialab patches. Plugins read this via reflection and skip their own workarounds
         /// for a listed capability; each patch commit adds its id here (e.g. "live-probe-index").
         /// </summary>
-        public static readonly string[] Features = ["live-analyze-hint", "live-hls-hints", "plugin-web-scripts", "plugin-user-menu", "plugin-signatures", "medialab-catalog", "medialab-priority"];
+        public static readonly string[] Features = ["live-analyze-hint", "live-hls-hints", "plugin-web-scripts", "plugin-user-menu", "plugin-signatures", "medialab-catalog", "medialab-priority", "builtin-tv"];
     }
 }

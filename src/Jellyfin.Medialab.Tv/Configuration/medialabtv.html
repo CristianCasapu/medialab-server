@@ -1,0 +1,102 @@
+<div data-role="page" class="page type-interior pluginConfigurationPage mltvAdmin" data-controller="__plugin/medialabtvjs" data-title="MediaLab TV">
+    <div data-role="content">
+    <div class="content-primary">
+        <style>
+            .mltvAdmin .tv-wrap { max-width: 60em; }
+            .mltvAdmin .tv-card { background: rgba(127,127,127,.08); border: 1px solid rgba(127,127,127,.25); border-radius: .55em; padding: 1em 1.1em; margin-bottom: 1em; }
+            .mltvAdmin .tv-card h3 { margin: 0 0 .6em; font-size: 1.05em; }
+            .mltvAdmin .tv-muted { opacity: .65; font-size: .9em; }
+            .mltvAdmin .tv-row { display: flex; gap: .8em; align-items: center; flex-wrap: wrap; margin: .5em 0; }
+            .mltvAdmin label.tv-check { display: flex; gap: .6em; align-items: flex-start; margin: .55em 0; cursor: pointer; }
+            .mltvAdmin label.tv-check input { margin-top: .25em; }
+            .mltvAdmin .tv-field { display: flex; flex-direction: column; gap: .3em; margin: .7em 0; }
+            .mltvAdmin .tv-field input[type=text], .mltvAdmin .tv-field input[type=password], .mltvAdmin .tv-field select { max-width: 32em; padding: .45em; background: rgba(127,127,127,.12); color: inherit; border: 1px solid rgba(127,127,127,.25); border-radius: .3em; font: inherit; }
+            .mltvAdmin .tv-field select option { color: #000; }
+            .mltvAdmin .tv-colors { display: flex; gap: 1.5em; flex-wrap: wrap; }
+            .mltvAdmin .tv-color { display: flex; align-items: center; gap: .5em; }
+            .mltvAdmin .tv-color input[type=text] { width: 7em; }
+            .mltvAdmin .tv-color input[type=color] { width: 2.6em; height: 2em; padding: 0; border: 0; background: none; }
+            .mltvAdmin .tv-btn { font: inherit; padding: .55em 1.1em; border-radius: .35em; border: 0; background: #52b54b; color: #fff; cursor: pointer; }
+            .mltvAdmin .tv-btn.secondary { background: rgba(127,127,127,.25); }
+            .mltvAdmin code, .mltvAdmin pre { background: rgba(127,127,127,.2); padding: .1em .35em; border-radius: .25em; word-break: break-all; white-space: pre-wrap; }
+            .mltvAdmin pre { padding: .6em; font-size: .85em; }
+            .mltvAdmin .hide { display: none; }
+            .mltvAdmin .tv-ok { color: #52b54b; } .mltvAdmin .tv-warn { color: #ffb74d; }
+            .mltvAdmin .tv-slug { display: flex; align-items: center; gap: .2em; }
+            .mltvAdmin .tv-slug input { width: 10em; }
+            .mltvAdmin .tv-preview { border-radius: .5em; padding: 1.2em; text-align: center; max-width: 26em; border: 1px solid rgba(127,127,127,.25); }
+            .mltvAdmin .tv-preview img { width: 64px; height: 64px; object-fit: contain; }
+            .mltvAdmin .tv-preview .pv-name { font-size: 1.5em; font-weight: 600; margin: .2em 0; }
+            .mltvAdmin .tv-preview .pv-btn { display: inline-block; margin-top: .6em; padding: .4em 1.2em; border-radius: .3em; font-weight: 600; }
+            .mltvAdmin .tv-preview .pv-foot { font-size: .75em; opacity: .7; margin-top: .8em; }
+        </style>
+        <div class="tv-wrap">
+            <h2>MediaLab TV</h2>
+            <p class="tv-muted" data-i18n="intro"></p>
+            <p class="tv-warn hide" id="tvNoLicense" data-i18n="noLicense"></p>
+
+            <div class="tv-card">
+                <h3 data-i18n="addressTitle">Adresa pentru televizoare</h3>
+                <p class="tv-muted" data-i18n="addressText"></p>
+                <p><code id="tvUrlMain"></code></p>
+                <p id="tvUrlShortRow"><code id="tvUrlShort"></code></p>
+                <p class="tv-muted" data-i18n="qcHint"></p>
+            </div>
+
+            <div class="tv-card">
+                <h3 data-i18n="brandTitle">Branding</h3>
+                <div class="tv-field"><label for="tvName" data-i18n="name"></label><input type="text" id="tvName" maxlength="40"></div>
+                <div class="tv-field"><label for="tvShort" data-i18n="short"></label><input type="text" id="tvShort" maxlength="30"><span class="tv-muted" data-i18n="shortText"></span></div>
+                <div class="tv-field"><label for="tvTagline" data-i18n="tagline"></label><input type="text" id="tvTagline" maxlength="80" placeholder="example.com"></div>
+                <div class="tv-field"><label for="tvFooter" data-i18n="footer"></label><input type="text" id="tvFooter" maxlength="120"><span class="tv-muted" data-i18n="footerText"></span></div>
+                <div class="tv-field"><label data-i18n="colors"></label>
+                    <div class="tv-colors">
+                        <span class="tv-color"><input type="color" id="tvAccentPick"><input type="text" id="tvAccent" maxlength="7"><span data-i18n="accent"></span></span>
+                        <span class="tv-color"><input type="color" id="tvBgPick"><input type="text" id="tvBg" maxlength="7"><span data-i18n="background"></span></span>
+                    </div>
+                </div>
+                <div class="tv-field"><label for="tvLang" data-i18n="language"></label>
+                    <select id="tvLang"><option value="auto" data-i18n="langAuto"></option><option value="ro">Română</option><option value="en">English</option></select></div>
+                <div class="tv-field"><label data-i18n="logo"></label>
+                    <div class="tv-row"><input type="file" id="tvLogoFile" accept="image/png,image/svg+xml,.png,.svg"><button type="button" class="tv-btn secondary" id="tvLogoReset" data-i18n="logoReset"></button></div>
+                    <span class="tv-muted" data-i18n="logoText"></span><span class="tv-warn" id="tvLogoError"></span></div>
+                <div class="tv-field"><label for="tvAfter" data-i18n="after"></label>
+                    <select id="tvAfter"><option value="ui" data-i18n="afterUi"></option><option value="web" data-i18n="afterWeb"></option></select><span class="tv-muted" data-i18n="afterText"></span></div>
+                <label class="tv-check"><input type="checkbox" id="tvLive"><span data-i18n="liveRows"></span></label>
+                <label class="tv-check"><input type="checkbox" id="tvRemember"><span data-i18n="remember"></span></label>
+                <p class="tv-warn hide" id="tvRememberWarn" data-i18n="rememberWarn"></p>
+                <p class="tv-muted" data-i18n="rememberText"></p>
+                <label class="tv-check"><input type="checkbox" id="tvPhone"><span data-i18n="phone"></span></label>
+                <label class="tv-check"><input type="checkbox" id="tvRegister"><span data-i18n="register"></span></label>
+                <div class="tv-field"><label data-i18n="preview"></label>
+                    <div class="tv-preview" id="tvPreview"><img id="pvLogo" alt=""><div class="pv-name" id="pvName"></div><div id="pvTagline"></div><span class="pv-btn" id="pvBtn" data-i18n="signIn"></span><div class="pv-foot" id="pvFoot"></div></div></div>
+                <p class="tv-warn" id="tvBrandError"></p>
+                <div class="tv-row"><button type="button" class="tv-btn" id="tvSaveBrand" data-i18n="save">Salvează</button><span id="tvSavedBrand" class="tv-muted"></span></div>
+            </div>
+
+            <div class="tv-card">
+                <h3 data-i18n="secTitle">Securitate la conectare</h3>
+                <label class="tv-check"><input type="checkbox" id="tvTsOn"><span data-i18n="tsOn"></span></label>
+                <p class="tv-muted" data-i18n="tsText"></p>
+                <label class="tv-check"><input type="checkbox" id="tvTsReg"><span data-i18n="tsReg"></span></label>
+                <p class="tv-muted" id="tvTsRegState"></p>
+                <div id="tvTsOwn">
+                    <div class="tv-field"><label for="tvTsSite" data-i18n="tsSite"></label><input type="text" id="tvTsSite" maxlength="200" autocomplete="off" spellcheck="false"></div>
+                    <div class="tv-field"><label for="tvTsSecret" data-i18n="tsSecret"></label><input type="password" id="tvTsSecret" data-secret="TurnstileSecretKey" maxlength="200" autocomplete="new-password"></div>
+                </div>
+                <p id="tvTsState"></p>
+                <div class="tv-row"><button type="button" class="tv-btn" id="tvSaveSec" data-i18n="save">Salvează</button><span id="tvSavedSec" class="tv-muted"></span></div>
+            </div>
+
+            <div class="tv-card">
+                <h3 data-i18n="pathTitle">Calea de acces</h3>
+                <p class="tv-muted" data-i18n="pathText"></p>
+                <div class="tv-field"><label for="tvSlug" data-i18n="path"></label><span class="tv-slug"><code>/web/</code><input type="text" id="tvSlug" maxlength="40"><code>/</code></span></div>
+                <p id="tvPathState"></p>
+                <p class="tv-warn" id="tvPathMessage"></p>
+                <div class="tv-row"><button type="button" class="tv-btn" id="tvSavePath" data-i18n="apply">Aplică</button><span id="tvSavedPath" class="tv-muted"></span></div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>

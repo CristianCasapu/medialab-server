@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{lang}}" data-lang="{{langSetting}}" data-api="{{api}}" data-platform="{{platform}}" data-client="{{client}}" data-livetv="{{livetv}}" data-version="{{version}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>{{name}}</title>
+<meta name="application-name" content="{{client}}">
+<meta name="theme-color" content="#141414">
+<link rel="icon" href="logo?v={{logoVersion}}">
+<link rel="stylesheet" href="browse.css?v={{version}}">
+<link rel="stylesheet" href="browse-theme.css?v={{themeVersion}}">
+</head>
+<!-- MediaLab TV: interfata stil Netflix, servita de plugin. Textele (ro/en) si tot continutul vin din browse.js. -->
+<body class="ml-loading">
+<header id="mlHeader" class="ml-header">
+  <a class="ml-brand f" href="#/home" id="mlBrand"><img src="logo?v={{logoVersion}}" alt="" class="ml-brand-logo"><span class="ml-brand-name">{{name}}</span></a>
+  <nav class="ml-nav" id="mlNav">
+    <a class="f" href="#/home" data-nav="home" data-i18n="home"></a>
+    <a class="f" href="#/list/movies" data-nav="movies" data-i18n="movies"></a>
+    <a class="f" href="#/list/series" data-nav="series" data-i18n="series"></a>
+    <a class="f hidden" href="#/list/livetv" data-nav="livetv" data-i18n="liveTv" id="mlNavLive"></a>
+    <a class="f" href="#/list/favorites" data-nav="favorites" data-i18n="myList"></a>
+  </nav>
+  <div class="ml-tools">
+    <a class="f ml-icon-btn hidden" href="#" id="mlFullBtn" role="button"><span class="ml-i-full" aria-hidden="true"></span><span class="ml-sr" id="mlFullLabel" data-i18n="fullScreen"></span></a>
+    <a class="f ml-icon-btn" href="#/search" data-nav="search" id="mlSearchBtn"><span class="ml-i-search" aria-hidden="true"></span><span class="ml-sr" data-i18n="search"></span></a>
+    <a class="f ml-me" href="#/profiles" data-nav="profiles" id="mlMe"><span class="ml-avatar small" id="mlMeAvatar"></span></a>
+  </div>
+</header>
+
+<main id="mlMain">
+  <section id="mlHome" class="ml-screen hidden"></section>
+  <section id="mlTitle" class="ml-screen hidden"></section>
+  <section id="mlList" class="ml-screen hidden"></section>
+  <section id="mlSearch" class="ml-screen hidden"></section>
+  <section id="mlProfiles" class="ml-screen ml-fullscreen hidden"></section>
+</main>
+
+<section id="mlPlayer" class="ml-player hidden">
+  <video id="mlVideo" playsinline preload="none"></video>
+  <div class="ml-spinner hidden" id="mlSpin"></div>
+  <div class="ml-osd" id="mlOsd">
+    <div class="ml-osd-top">
+      <button type="button" class="f ml-osd-back" id="mlBack"><span class="ml-i-back" aria-hidden="true"></span><span class="ml-sr" data-i18n="back"></span></button>
+      <div class="ml-osd-title"><div id="mlOsdTitle"></div><div class="ml-osd-sub" id="mlOsdSub"></div><div class="ml-osd-badges hidden" id="mlOsdBadges"></div></div>
+    </div>
+    <div class="ml-osd-bottom">
+      <div class="ml-osd-seek">
+        <button type="button" class="f ml-osd-bar" id="mlBar"><span id="mlBarFill"></span><i id="mlBarBuf"></i><b class="ml-seekhint hidden" id="mlSeekHint"></b></button>
+        <div class="ml-osd-time"><span id="mlTimePos">0:00</span> / <span id="mlTimeDur">0:00</span></div>
+      </div>
+      <div class="ml-osd-buttons" id="mlOsdButtons">
+        <button type="button" class="f ml-btn round" id="mlPlayPause"><span class="ml-i-pause" id="mlPPIcon" aria-hidden="true"></span><span class="ml-sr" data-i18n="playPause"></span></button>
+        <button type="button" class="f ml-btn round" id="mlRew"><span aria-hidden="true">-10</span><span class="ml-sr" data-i18n="rewind"></span></button>
+        <button type="button" class="f ml-btn round" id="mlFwd"><span aria-hidden="true">+30</span><span class="ml-sr" data-i18n="forward"></span></button>
+        <button type="button" class="f ml-btn round hidden" id="mlOsdFull"><span class="ml-i-full" aria-hidden="true"></span><span class="ml-sr" id="mlOsdFullLabel" data-i18n="fullScreen"></span></button>
+        <span class="ml-osd-spacer"></span>
+        <button type="button" class="f ml-btn ghost" id="mlAudioBtn" data-i18n="audio"></button>
+        <button type="button" class="f ml-btn ghost" id="mlSubsBtn" data-i18n="subtitles"></button>
+        <button type="button" class="f ml-btn ghost hidden" id="mlChapBtn" data-i18n="chapters"></button>
+        <button type="button" class="f ml-btn ghost hidden" id="mlChanBtn" data-i18n="channels"></button>
+        <button type="button" class="f ml-btn ghost hidden" id="mlNextBtn" data-i18n="nextEpisode"></button>
+        <button type="button" class="f ml-btn round hidden" id="mlLockBtn"><span class="ml-i-lock" id="mlLockIcon" aria-hidden="true"></span><span class="ml-sr" id="mlLockLabel" data-i18n="lockOsd"></span></button>
+      </div>
+    </div>
+  </div>
+  <div class="ml-tracks hidden" id="mlTracks"><h3 id="mlTracksTitle"></h3><div id="mlTracksList"></div></div>
+  <div class="ml-chanbox hidden" id="mlChanBox"><h3 id="mlChanTitle"></h3><div class="ml-chan-list" id="mlChanList"></div></div>
+  <div class="ml-chanbox hidden" id="mlChapBox"><h3 id="mlChapTitle"></h3><div class="ml-chan-list" id="mlChapList"></div></div>
+  <div class="ml-vol hidden" id="mlVol"><span class="ml-vol-label" id="mlVolLabel"></span><span class="ml-vol-track"><i id="mlVolFill"></i></span><b class="ml-vol-pct" id="mlVolPct"></b></div>
+  <button type="button" class="f ml-skip hidden" id="mlSkip"></button>
+  <p class="ml-play-error hidden" id="mlPlayError"></p>
+</section>
+
+<div id="mlNetBox" class="ml-netbox hidden"><div class="ml-netbox-card">
+  <h2 data-i18n="netCheck"></h2>
+  <div class="ml-spinner" id="mlNetSpin"></div>
+  <div class="ml-net-status" id="mlNetStatus"></div>
+  <div class="ml-net-result hidden" id="mlNetResult"><b id="mlNetSpeed"></b><p id="mlNetVerdict"></p><p class="ml-net-q" id="mlNetQuality"></p></div>
+  <div class="ml-buttons"><button type="button" class="f ml-btn primary hidden" id="mlNetRepeat" data-i18n="netRepeat"></button><button type="button" class="f ml-btn" id="mlNetClose" data-i18n="back"></button></div>
+</div></div>
+<div id="mlToast" class="ml-toast hidden"></div>
+<div id="mlDigits" class="ml-digits hidden"></div>
+<div id="mlDialog" class="ml-dialog hidden"><div class="ml-dialog-box"><h2 id="mlDialogText"></h2><div class="ml-buttons"><button type="button" class="f ml-btn primary" id="mlDialogYes"></button><button type="button" class="f ml-btn" id="mlDialogNo"></button></div></div></div>
+<script src="browse.js?v={{version}}"></script>
+</body>
+</html>

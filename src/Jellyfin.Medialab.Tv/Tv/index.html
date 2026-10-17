@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="{{lang}}" data-lang="{{langSetting}}" data-api="{{api}}" data-platform="{{platform}}" data-client="{{client}}" data-phone="{{phone}}" data-register="{{register}}" data-footer="{{footerSet}}" data-after="{{after}}" data-remember="{{remember}}" data-turnstile="{{turnstile}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{name}}</title>
+<meta name="application-name" content="{{client}}">
+<link rel="icon" href="logo?v={{logoVersion}}">
+<link rel="stylesheet" href="app.css?v={{version}}">
+<link rel="stylesheet" href="theme.css?v={{themeVersion}}">
+</head>
+<!-- Servită de plugin (MediaLab TV), nu de interfața web a serverului: scriptul se încarcă normal. Textele vin din tv.js (ro/en). -->
+<body>
+<div id="brand">
+  <img src="logo?v={{logoVersion}}" alt="" id="logo">
+  <h1 id="appName">{{name}}</h1>
+  <p class="site{{subtitleClass}}" id="subtitle">{{subtitle}}</p>
+</div>
+
+<div id="splash" class="screen">
+  <p id="status" data-i18n="connecting"></p>
+  <p id="hint" class="hint hidden" data-i18n="switchHint"></p>
+</div>
+
+<form id="login" class="screen hidden" autocomplete="off">
+  <p id="error" class="error hidden"></p>
+  <label for="user" data-i18n="user"></label>
+  <input id="user" class="nav" type="text" autocapitalize="off" autocorrect="off" spellcheck="false">
+  <label for="pass" data-i18n="password"></label>
+  <input id="pass" class="nav" type="password">
+  <div id="tsBox" class="ts hidden" tabindex="-1"></div>
+  <button id="submit" class="nav" type="submit" data-i18n="signIn"></button>
+  <button id="phone" class="nav secondary hidden" type="button" data-i18n="phoneSignIn"></button>
+  <button id="register" class="nav secondary hidden" type="button" data-i18n="newAccount"></button>
+  <p class="hint" data-i18n="savedHint"></p>
+</form>
+
+<div id="qr" class="screen hidden">
+  <h2 id="qrTitle"></h2>
+  <p id="qrText" class="hint"></p>
+  <img id="qrImage" alt="">
+  <p id="qrCode" class="hint"></p>
+  <p id="qrState"></p>
+  <button id="qrBack" class="nav secondary" type="button" data-i18n="back"></button>
+</div>
+
+<div id="offline" class="screen hidden">
+  <p class="error" id="offlineText"></p>
+  <button id="retry" class="nav" type="button" data-i18n="retry"></button>
+</div>
+
+<p id="footer">{{footer}}</p>
+<script src="tv.js?v={{version}}"></script>
+</body>
+</html>

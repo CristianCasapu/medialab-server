@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -70,7 +71,8 @@ namespace Jellyfin.Server
                 options.HttpsPort = _serverApplicationHost.HttpsPort;
             });
 
-            services.AddJellyfinApi(_serverApplicationHost.GetApiPluginAssemblies(), _serverConfigurationManager.GetNetworkConfiguration());
+            // medialab: the built-in MediaLab TV controllers join the API like a plugin assembly (capability "builtin-tv")
+            services.AddJellyfinApi(_serverApplicationHost.GetApiPluginAssemblies().Append(MediaLabTv.MedialabTv.Assembly), _serverConfigurationManager.GetNetworkConfiguration());
             services.AddJellyfinDbContext(_serverApplicationHost.ConfigurationManager, _configuration);
             services.AddJellyfinApiSwagger();
 
@@ -158,6 +160,21 @@ namespace Jellyfin.Server
             services.AddHostedService<RecordingNotifier>();
             services.AddHostedService<DeviceAccessHost>();
             services.AddHostedService<Medialab.MedialabCatalogHost>();
+
+            var paths = _serverConfigurationManager.ApplicationPaths;
+            var tvImport = MediaLabTv.MedialabTv.Add(
+                services,
+                new Emby.Server.Implementations.Serialization.MyXmlSerializer(),
+                paths.ConfigurationDirectoryPath,
+                paths.DataPath,
+                paths.PluginsPath,
+                _serverApplicationHost.SystemId,
+                Medialab.MedialabEdition.Revision,
+                message => Serilog.Log.Warning("{Message}", message));
+            if (tvImport is not null)
+            {
+                Serilog.Log.Information("MediaLab TV is built in: took over the jf-tvapp plugin's {Imported}", tvImport);
+            }
         }
 
         /// <summary>

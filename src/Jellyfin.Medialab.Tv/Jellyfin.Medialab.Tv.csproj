@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    medialab: MediaLab TV built into the server (capability "builtin-tv", plan J9). Shared/ and Tv/ are copied unchanged
+    from the jf-tvapp plugin (medialab-tv-for-jellyfin) by sync/sync-tv.sh; only the files at the project root are native.
+    The shared code keeps the plugin's style, so the repo-wide analyzers are relaxed for this project only.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MediaLabTv</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <RunAnalyzers>false</RunAnalyzers>
+    <AnalysisMode>None</AnalysisMode>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS1591;CS8618;CA1002;CA1031;CA1062</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Jellyfin.Medialab.Tv.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MediaBrowser.Model\MediaBrowser.Model.csproj" />
+    <ProjectReference Include="..\..\MediaBrowser.Controller\MediaBrowser.Controller.csproj" />
+    <ProjectReference Include="..\..\MediaBrowser.Common\MediaBrowser.Common.csproj" />
+    <ProjectReference Include="..\..\Jellyfin.Data\Jellyfin.Data.csproj" />
+    <ProjectReference Include="..\Jellyfin.Database\Jellyfin.Database.Implementations\Jellyfin.Database.Implementations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Tv\*" LogicalName="MediaLabTv.Tv.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Configuration\*.html;Configuration\*.js" LogicalName="MediaLabTv.Configuration.%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

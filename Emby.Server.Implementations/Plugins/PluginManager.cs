@@ -133,6 +133,13 @@ namespace Emby.Server.Implementations.Plugins
                     continue;
                 }
 
+                // medialab: a plugin replaced by a built-in feature would register the same routes twice
+                if (BuiltinPages.ReplacedPlugins.TryGetValue(plugin.Id, out var builtinFeature))
+                {
+                    _logger.LogInformation("Skipping plugin {Name} {Version}: {Feature} is built into medialab Server", plugin.Name, plugin.Version, builtinFeature);
+                    continue;
+                }
+
                 var assemblyLoadContext = new PluginLoadContext(plugin.Path);
                 _assemblyLoadContexts.Add(assemblyLoadContext);
 

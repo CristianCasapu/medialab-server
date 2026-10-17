@@ -1,0 +1,216 @@
+/* Ecran de televizor: totul mare, contrast ridicat, focus foarte vizibil.
+ * Culorile de brand (fundal, accent) le suprascrie theme.css, generat de plugin din setari. */
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #101418;
+  color: #f2f2f2;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 28px;
+  overflow: hidden;
+}
+body {
+  text-align: center;
+}
+#brand {
+  padding-top: 7vh;
+}
+#logo {
+  width: 160px;
+  height: 160px;
+}
+h1 {
+  margin: 16px 0 4px;
+  font-size: 64px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+.site {
+  margin: 0;
+  color: #52b54b;
+  font-size: 30px;
+}
+.screen {
+  width: 640px;
+  margin: 5vh auto 0;
+}
+.hidden {
+  display: none;
+}
+#status {
+  font-size: 34px;
+  color: #cfcfcf;
+}
+.hint {
+  color: #8a9199;
+  font-size: 24px;
+}
+.error {
+  color: #ff7a6e;
+  font-size: 28px;
+}
+label {
+  display: block;
+  text-align: left;
+  margin: 18px 0 6px;
+  color: #cfcfcf;
+}
+input, button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 32px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 4px solid #2a3138;
+  outline: none;
+}
+input {
+  background: #1d2329;
+  color: #fff;
+}
+button {
+  margin-top: 30px;
+  background: #52b54b;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+input:focus, button:focus, .focus {
+  border-color: #fff;
+  box-shadow: 0 0 0 4px #52b54b;
+}
+#footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3vh;
+  margin: 0;
+  color: #5f666d;
+  font-size: 20px;
+}
+
+/* Cat timp e afisat formularul: antet mic, fara subsol. */
+.compact #brand {
+  padding-top: 3vh;
+}
+.compact #logo {
+  width: 72px;
+  height: 72px;
+  vertical-align: middle;
+}
+.compact h1 {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0 0 16px;
+  font-size: 44px;
+}
+.compact .site {
+  font-size: 24px;
+}
+.compact .screen {
+  margin-top: 2vh;
+}
+.compact label {
+  margin: 10px 0 4px;
+}
+.compact button {
+  margin-top: 20px;
+}
+.compact .hint {
+  margin: 12px 0 0;
+}
+.compact #footer {
+  display: none;
+}
+
+button.secondary {
+  background: #2a3138;
+}
+#qr h2 {
+  margin: 0 0 8px;
+  font-size: 40px;
+}
+#qrImage {
+  width: 360px;
+  height: 360px;
+  background: #fff;
+  padding: 12px;
+  border-radius: 12px;
+}
+#qrState {
+  color: #cfcfcf;
+}
+body.qrmode #brand,
+body.qrmode #footer {
+  display: none;
+}
+body.qrmode #qr {
+  width: 900px;
+  margin-top: 3vh;
+}
+#qr {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  grid-template-areas: "img title" "img text" "img code" "img state" "img back";
+  column-gap: 48px;
+  align-items: center;
+  text-align: left;
+}
+#qr.hidden {
+  display: none;
+}
+#qrImage { grid-area: img; }
+#qr h2 { grid-area: title; align-self: end; }
+#qrText { grid-area: text; font-size: 28px; color: #cfcfcf; }
+#qrCode { grid-area: code; letter-spacing: 4px; }
+#qrState { grid-area: state; }
+#qrBack { grid-area: back; margin-top: 10px; align-self: start; }
+
+/* Fara imagine QR (Quick Connect nativ fara pagina de telefon): doar textul si codul, mare. */
+#qr.noimg {
+  display: block;
+  text-align: center;
+}
+#qr.noimg #qrImage {
+  display: none;
+}
+#qr.noimg #qrCode {
+  font-size: 72px;
+  color: #fff;
+  letter-spacing: 12px;
+  margin: 24px 0;
+}
+
+/* Ecranul neutru fara licenta. */
+body.unavailable .screen {
+  width: 900px;
+  margin-top: 18vh;
+}
+body.unavailable h2 {
+  font-size: 40px;
+  margin: 40px 0 8px;
+}
+
+/* Trei butoane sub formular pe 720p: cele secundare mai stranse. */
+.compact button.secondary {
+  margin-top: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Cloudflare Turnstile: apare doar cand Cloudflare cere o interactiune; focusul telecomenzii il atinge ca pe un camp. */
+.ts {
+  display: block;
+  margin: 14px auto 4px;
+  min-height: 65px;
+  text-align: center;
+  border-radius: 6px;
+  outline: none;
+}
+.ts.hidden {
+  display: none;
+}
+.ts:focus {
+  box-shadow: 0 0 0 4px #ffffff;
+}
