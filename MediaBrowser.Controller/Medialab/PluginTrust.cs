@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace MediaBrowser.Controller.Medialab;
@@ -142,6 +143,47 @@ public static class PluginTrust
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// Verifies a plugin zip archive: every DLL in it must have a matching .sig next to it, signed by medialab.
+    /// </summary>
+    /// <param name="zipStream">The zip package.</param>
+    /// <returns><c>true</c> when every DLL is signed by medialab.</returns>
+    public static bool VerifyPackage(Stream zipStream)
+    {
+        ArgumentNullException.ThrowIfNull(zipStream);
+        using var zip = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Read, leaveOpen: true);
+        var entries = zip.Entries.ToDictionary(e => e.FullName, e => e, StringComparer.OrdinalIgnoreCase);
+        var any = false;
+        foreach (var dll in zip.Entries.Where(e => e.FullName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)))
+        {
+            if (!entries.TryGetValue(dll.FullName + SignatureExtension, out var sigEntry))
+            {
+                return false;
+            }
+
+            using var dllBytes = new MemoryStream();
+            using (var dllStream = dll.Open())
+            {
+                dllStream.CopyTo(dllBytes);
+            }
+
+            string signature;
+            using (var reader = new StreamReader(sigEntry.Open()))
+            {
+                signature = reader.ReadToEnd();
+            }
+
+            if (!Verify(dllBytes.ToArray(), signature, _publicKeys))
+            {
+                return false;
+            }
+
+            any = true;
+        }
+
+        return any;
     }
 
     /// <summary>

@@ -124,7 +124,9 @@ namespace Emby.Server.Implementations.Plugins
                 UpdatePluginSupersededStatus(plugin);
                 if (trust[plugin] == PluginTrustState.Modified)
                 {
-                    _logger.LogWarning("Plugin {Name} {Version}: the medialab signature does not match its files (changed after signing)", plugin.Name, plugin.Version);
+                    // medialab (ML-02): a plugin changed after signing is refused; unsigned third-party plugins still load.
+                    _logger.LogError("Plugin {Name} {Version}: the medialab signature does not match its files (changed after signing); the plugin is NOT loaded", plugin.Name, plugin.Version);
+                    continue;
                 }
 
                 if (plugin.IsEnabledAndSupported == false)

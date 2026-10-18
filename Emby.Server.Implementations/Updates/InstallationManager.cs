@@ -21,6 +21,7 @@ using MediaBrowser.Controller;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Events;
 using MediaBrowser.Controller.Events.Updates;
+using MediaBrowser.Controller.Medialab;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Updates;
 using Microsoft.Extensions.Logging;
@@ -601,6 +602,17 @@ namespace Emby.Server.Implementations.Updates
                 }
 
                 // Version folder as they cannot be overwritten in Windows.
+                // medialab (ML-03): packages from the medialab catalogue must carry a valid plugin signature
+                if (package.SourceUrl.StartsWith("https://medialab.works/", StringComparison.OrdinalIgnoreCase))
+                {
+                    stream.Position = 0;
+                    if (!PluginTrust.VerifyPackage(stream))
+                    {
+                        _logger.LogError("Refusing to install {Package} {Version}: the package from the medialab catalogue is not signed by medialab.", package.Name, package.Version);
+                        throw new InvalidDataException("The package is not signed by medialab.");
+                    }
+                }
+
                 targetDir += "_" + package.Version;
 
                 if (Directory.Exists(targetDir))
