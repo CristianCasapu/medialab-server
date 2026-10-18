@@ -175,7 +175,8 @@ public static partial class Turnstile
             }
 
             var action = root.TryGetProperty("action", out var a) && a.ValueKind == JsonValueKind.String ? a.GetString() ?? string.Empty : string.Empty;
-            return action.Length == 0 || action == Action ? TurnstileOutcome.Ok : TurnstileOutcome.WrongAction;
+            // ML-01: tokenul trebuie sa vina exact de pe pagina de conectare TV (action), nu de la alt widget cu aceeasi cheie
+            return action == Action ? TurnstileOutcome.Ok : TurnstileOutcome.WrongAction;
         }
         catch (JsonException)
         {

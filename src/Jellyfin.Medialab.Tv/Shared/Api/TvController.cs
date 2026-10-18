@@ -213,7 +213,7 @@ public sealed class TvController : ControllerBase
             return StatusCode(429, new TvLoginError { Error = "too_many" });
         }
 
-        var hosts = Turnstile.Hosts(Request.Headers.Host.ToString(), Request.Headers["X-Forwarded-Host"].ToString(), Request.Headers.Origin.ToString());
+        var hosts = Turnstile.Hosts(Request.Headers.Host.ToString()); // ML-01: doar Host (nu X-Forwarded-Host/Origin, controlate de client)
         var outcome = await Turnstile.VerifyAsync(keys.SecretKey, request?.Turnstile, client, hosts, HttpContext.RequestAborted).ConfigureAwait(false);
         if (outcome != TurnstileOutcome.Ok)
         {
