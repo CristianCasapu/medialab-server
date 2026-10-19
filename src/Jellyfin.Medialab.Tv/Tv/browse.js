@@ -62,7 +62,10 @@
       director: 'Regia', genresLabel: 'Genuri', studios: 'Studiouri', sortName: 'A–Z', sortAdded: 'Adăugate recent', sortYear: 'An', sortRating: 'Notă',
       channelsN: '{0} canale', now: 'acum', nextHour: 'în următoarea oră', next4h: 'în următoarele 4 ore', space: 'Spațiu', del: 'Șterge', clear: 'Golește',
       exitQ: 'Ieșiți din aplicație?', exit: 'Ieșire', tvModeOn: 'Mod TV: pornit', tvModeOff: 'Mod TV: oprit',
-      added: 'Adăugat în lista ta.', removed: 'Scos din lista ta.', markedWatched: 'Marcat ca văzut.', markedUnwatched: 'Marcat ca nevăzut.', episodeN: 'Episodul {0}'
+      added: 'Adăugat în lista ta.', removed: 'Scos din lista ta.', markedWatched: 'Marcat ca văzut.', markedUnwatched: 'Marcat ca nevăzut.', episodeN: 'Episodul {0}',
+      rosubDownload: 'Descarcă de pe rosub', rosubTitle: 'Subtitrări rosub', rosubHint: 'Se caută subtitrări românești pentru titlul curent. Ajustează textul și apasă Caută.',
+      rosubSearching: 'Se caută pe rosub…', rosubEmpty: 'Nicio subtitrare găsită pe rosub.', rosubFailed: 'Căutarea pe rosub a eșuat. Încearcă din nou.', rosubDownloading: 'Se descarcă subtitrarea…',
+      rosubUnavailable: 'rosub indisponibil — lipsește cheia API sau subs.ro nu răspunde.', rosubLoaded: 'Subtitrarea a fost încărcată.', rosubExt: 'rosub: {0}'
     },
     en: {
       fullScreen: 'Full screen', exitFullScreen: 'Exit full screen', fullHint: 'Press OK (or F) for full screen',
@@ -83,7 +86,10 @@
       director: 'Director', genresLabel: 'Genres', studios: 'Studios', sortName: 'A–Z', sortAdded: 'Recently added', sortYear: 'Year', sortRating: 'Rating',
       channelsN: '{0} channels', now: 'now', nextHour: 'in the next hour', next4h: 'in the next 4 hours', space: 'Space', del: 'Delete', clear: 'Clear',
       exitQ: 'Exit the app?', exit: 'Exit', tvModeOn: 'TV mode: on', tvModeOff: 'TV mode: off',
-      added: 'Added to My List.', removed: 'Removed from My List.', markedWatched: 'Marked as watched.', markedUnwatched: 'Marked as unwatched.', episodeN: 'Episode {0}'
+      added: 'Added to My List.', removed: 'Removed from My List.', markedWatched: 'Marked as watched.', markedUnwatched: 'Marked as unwatched.', episodeN: 'Episode {0}',
+      rosubDownload: 'Download from rosub', rosubTitle: 'rosub subtitles', rosubHint: 'Searching rosub for Romanian subtitles of the current title. Adjust the text and press Search.',
+      rosubSearching: 'Searching rosub…', rosubEmpty: 'No subtitles found on rosub.', rosubFailed: 'The rosub search failed. Try again.', rosubDownloading: 'Downloading the subtitle…',
+      rosubUnavailable: 'rosub unavailable — the API key is missing or subs.ro is not responding.', rosubLoaded: 'The subtitle was loaded.', rosubExt: 'rosub: {0}'
     }
   };
   var LANG = pickLanguage();
@@ -133,7 +139,7 @@
   function rem() { return parseFloat(window.getComputedStyle(root).fontSize) || 18; }
 
   // Starea sesiunii
-  var S = { serverId: null, userId: null, token: null, user: null, hasLive: false, views: [], stack: [], replacing: false, homeBuilt: false, homeDirty: false, homeFocus: null, homeScroll: 0 };
+  var S = { serverId: null, userId: null, token: null, user: null, hasLive: false, views: [], stack: [], replacing: false, homeBuilt: false, homeDirty: false, homeFocus: null, homeScroll: 0, rosub: null };
 
   // ------------------------------------------------------------------------------------------------
   // Utilitare
@@ -350,7 +356,7 @@
   // ------------------------------------------------------------------------------------------------
 
   function imageUrl(id, type, width, tag, index) {
-    return API + '/Items/' + id + '/Images/' + type + (index ? '/' + index : '') + '?maxWidth=' + Math.round(width * DPR) + '&quality=' + (width > 900 ? 70 : 80) + (tag ? '&tag=' + enc(tag) : '');
+    return API + '/Items/' + id + '/Images/' + type + (index !== undefined && index !== null ? '/' + index : '') + '?maxWidth=' + Math.round(width * DPR) + '&quality=' + (width > 900 ? 70 : 80) + (tag ? '&tag=' + enc(tag) : '');
   }
 
   function tagOf(item, type) { return item.ImageTags && item.ImageTags[type]; }
@@ -380,6 +386,17 @@
     if (tagOf(item, 'Thumb')) return imageUrl(item.Id, 'Thumb', width, tagOf(item, 'Thumb'));
     if (tagOf(item, 'Primary')) return imageUrl(item.Id, 'Primary', width, tagOf(item, 'Primary'));
     return null;
+  }
+
+  // Fundalurile preincarcate la focusul cardului (rollover): pagina titlului apare instant.
+  // Doar imagini din etichetele deja primite — fara cereri API suplimentare.
+  var backdropCache = {};
+  function preloadBackdrop(item) {
+    var url = backdropImage(item, 1280);
+    if (!url || backdropCache[url]) return;
+    backdropCache[url] = true;
+    var img = new Image();
+    img.src = url;
   }
 
   var imgQueue = [];
@@ -570,6 +587,7 @@
     if (!hasClass($('mlPlayer'), 'hidden')) {
       if (!hasClass($('mlChanBox'), 'hidden')) return $('mlChanBox');
       if (!hasClass($('mlChapBox'), 'hidden')) return $('mlChapBox');
+      if (!hasClass($('mlRosub'), 'hidden')) return $('mlRosub');
       if (!hasClass($('mlTracks'), 'hidden')) return $('mlTracks');
       return $('mlPlayer');
     }
@@ -1036,6 +1054,7 @@
     if (P && !hasClass($('mlChanBox'), 'hidden')) { closeChannels(); return; }
     if (P && !hasClass($('mlChapBox'), 'hidden')) { closeChapters(); return; }
     if (P && !hasClass($('mlTracks'), 'hidden')) { closeTracks(); return; }
+    if (P && !hasClass($('mlRosub'), 'hidden')) { closeRosub(); return; }
     if (S.stack.length > 1) { history.back(); return; }
     var screen = currentScreen();
     if (P || !screen || screen.id !== 'mlHome') { go('#/home', true); return; }
@@ -1145,6 +1164,8 @@
     }
     a.appendChild(box);
     a.setAttribute('aria-label', text.title + (text.sub ? ', ' + text.sub : ''));
+    // Rollover (focus telecomanda / hover mouse): se preincarca lenes fundalul titlului.
+    a.mlOnFocus = function () { preloadBackdrop(item); };
     return a;
   }
 
@@ -1764,6 +1785,7 @@
         text.appendChild(name);
         if (ep.Overview) text.appendChild(el('div', 'ml-ep-over', ep.Overview));
         a.appendChild(text);
+        a.mlOnFocus = function () { preloadBackdrop(ep); };
         list.appendChild(a);
         if (highlight && ep.Id === highlight) a.mlHighlight = true;
       }
@@ -1845,11 +1867,9 @@
 
   // Numele unei biblioteci / colectii / genului / persoanei din titlul grilei (tot printr-o cerere a utilizatorului).
   function nameOf(id, node, byItems) {
-    if (byItems) {
-      get(U() + '/Items/' + enc(id) + '?Fields=Overview', function (status, data) { if (status === 200 && data) node.textContent = data.Name; });
-      return;
+    if (!byItems) {
+      for (var i = 0; i < S.views.length; i++) if (S.views[i].Id === id) { node.textContent = S.views[i].Name; return; }
     }
-    for (var i = 0; i < S.views.length; i++) if (S.views[i].Id === id) { node.textContent = S.views[i].Name; return; }
     loadItem(id, 'Overview', function (item) { if (item) node.textContent = item.Name; });
   }
 
@@ -2619,6 +2639,8 @@
       track.setAttribute('data-index', s.Index);
       video.appendChild(track);
     }
+    // Subtitrarea descarcata de pe rosub in aceasta sesiune de redare: se reataseaza dupa fiecare repornire.
+    if (state.ext) appendExtTrack(state.ext);
     var startSeconds = startTicks / TICKS;
     state.attachTicks = startTicks;
     var isHls = state.method !== 'DirectPlay';
@@ -2710,6 +2732,7 @@
   function stopPlayback(silent) {
     var state = P;
     if (!state) return;
+    removeExtSub(state);
     clearInterval(state.timer);
     clearInterval(state.countdownTimer);
     stopQualityMonitor(state);
@@ -2732,6 +2755,7 @@
     addClass($('mlPlayer'), 'hidden');
     addClass($('mlChanBox'), 'hidden');
     addClass($('mlChapBox'), 'hidden');
+    addClass($('mlRosub'), 'hidden');
     addClass($('mlVol'), 'hidden');
     removeClass(document.body, 'ml-playing');
     closeTracks();
@@ -2767,7 +2791,7 @@
     clearTimeout(osdTimer);
     osdTimer = setTimeout(function () {
       var v = $('mlVideo');
-      if (!P || v.paused || !hasClass($('mlTracks'), 'hidden') || !hasClass($('mlChanBox'), 'hidden') || !hasClass($('mlChapBox'), 'hidden') || !hasClass($('mlPlayError'), 'hidden')) return;
+      if (!P || v.paused || !hasClass($('mlTracks'), 'hidden') || !hasClass($('mlRosub'), 'hidden') || !hasClass($('mlChanBox'), 'hidden') || !hasClass($('mlChapBox'), 'hidden') || !hasClass($('mlPlayError'), 'hidden')) return;
       addClass($('mlOsd'), 'off');
       removeClass($('mlPlayer'), 'osd-on');
       if (document.activeElement && $('mlOsd').contains(document.activeElement)) {
@@ -2962,9 +2986,13 @@
     }
     var aBtn = $('mlAudioBtn'), sBtn = $('mlSubsBtn');
     aBtn.textContent = t('audio') + (audioLabel ? ': ' + audioLabel : '');
-    sBtn.textContent = t('subtitles') + (subs ? ': ' + (state.subtitle === -1 ? t('off') : subLabel) : '');
+    // Subtitrarea descarcata de pe rosub nu e un flux al serverului: se arata ca eticheta curenta cand e activa.
+    var shownSub = state.extOn && state.ext ? state.ext.label : (state.subtitle === -1 ? t('off') : subLabel);
+    sBtn.textContent = t('subtitles') + (subs || state.ext ? ': ' + shownSub : '');
     toggleClass(aBtn, 'disabled', audio < 2);
-    toggleClass(sBtn, 'disabled', subs === 0);
+    // Panoul de subtitrari ramane accesibil si fara fluxuri: de acolo se descarca de pe rosub.
+    toggleClass(sBtn, 'disabled', subs === 0 && !state.ext && !(S.rosub && S.rosub.enabled));
+    if (S.rosub === null) ensureRosub(function () { if (P) fillTracks(P); });
     toggleClass($('mlChanBtn'), 'hidden', !state.live);
     removeClass($('mlLockBtn'), 'hidden');
     updateChapBtn(state);
@@ -2980,7 +3008,10 @@
       // Sarim peste markerii de tip Intro/Credits — raman utile prin „Sari peste”.
       if (raw[i].MarkerType && raw[i].MarkerType !== 'None' && raw[i].MarkerType !== 'Chapter') continue;
       if (!(raw[i].StartPositionTicks > 0)) continue;
-      out.push(raw[i]);
+      var copy = {};
+      for (var k in raw[i]) { if (Object.prototype.hasOwnProperty.call(raw[i], k)) copy[k] = raw[i][k]; }
+      copy._mlIndex = i;
+      out.push(copy);
     }
     return out;
   }
@@ -3062,7 +3093,7 @@
     list.textContent = '';
     $('mlTracksTitle').textContent = kind === 'audio' ? t('audio') : t('subtitles');
     var streams = state.source.MediaStreams || [];
-    var current = kind === 'audio' ? state.audio : state.subtitle;
+    var current = kind === 'audio' ? state.audio : (kind === 'subtitle' && state.extOn && state.ext ? EXT_SUB : state.subtitle);
     var focus = null;
     var option = function (label, index) {
       var b = el('button', 'ml-track-opt f' + (index === current ? ' on' : ''), label);
@@ -3076,9 +3107,17 @@
       var s = streams[i];
       if ((kind === 'audio' && s.Type === 'Audio') || (kind === 'subtitle' && s.Type === 'Subtitle')) option(s.DisplayTitle || s.Language || ('#' + s.Index), s.Index);
     }
+    if (kind === 'subtitle') {
+      if (state.ext) option(state.ext.label, EXT_SUB);
+      var rb = el('button', 'ml-track-opt ml-track-rosub f', t('rosubDownload'));
+      rb.type = 'button';
+      rb.onclick = function () { closeTracks(); openRosub(); };
+      list.appendChild(rb);
+    }
     removeClass($('mlTracks'), 'hidden');
     clearTimeout(osdTimer);
-    focusEl(focus);
+    focusEl(focus || list.firstChild);
+    try { (document.activeElement || list.firstChild).scrollIntoView({ block: 'nearest' }); } catch (e) { }
   }
 
   // Intoarcerea focusului dupa inchiderea unui panou din player: pe OSD daca e vizibil, alt focus sters.
@@ -3095,6 +3134,179 @@
     addClass($('mlTracks'), 'hidden');
     showOsd();
     restoreOsdFocus($('mlPlayPause'));
+  }
+
+  // --- „Descarcă de pe rosub” (subtitrari romanesti via subs.ro, prin controller-ul pluginului) -------
+
+  // data-index al pistei externe descarcate in sesiunea de redare curenta (nu e un flux al serverului).
+  var EXT_SUB = 'ml-ext';
+
+  // Starea rosub a serverului (o singura citire pe sesiune): enabled = comutatorul adminului.
+  function ensureRosub(done) {
+    if (S.rosub) return done(S.rosub);
+    api('GET', '/MediaLabTv/Rosub/Status', null, function (status, data) {
+      S.rosub = status === 200 && data ? { enabled: data.Enabled !== false, ready: !!data.Ready } : { enabled: false, ready: false };
+      done(S.rosub);
+    });
+  }
+
+  function appendExtTrack(ext) {
+    var video = $('mlVideo');
+    if (video.querySelector('track[data-index="' + EXT_SUB + '"]')) return;
+    var track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = ext.label;
+    if (ext.lang) track.srclang = ext.lang;
+    track.src = ext.url;
+    track.setAttribute('data-index', EXT_SUB);
+    video.appendChild(track);
+  }
+
+  function removeExtSub(state) {
+    if (!state || !state.ext) return;
+    try { URL.revokeObjectURL(state.ext.url); } catch (e) { }
+    state.ext = null;
+    state.extOn = false;
+    var track = $('mlVideo').querySelector('track[data-index="' + EXT_SUB + '"]');
+    if (track && track.parentNode) track.parentNode.removeChild(track);
+  }
+
+  // Tastatura pe ecran (acelasi tipar ca la cautare), construita o singura data.
+  function buildRosubBox() {
+    var input = $('mlRosubInput'), keys = $('mlRosubKeys');
+    input.className = 'f' + (TV ? '' : ' ml-default');
+    if (keys.mlBuilt) return;
+    keys.mlBuilt = true;
+    input.setAttribute('aria-label', t('rosubTitle'));
+    $('mlRosubGo').onclick = runRosubSearch;
+    input.onkeydown = function (e) { if (e.keyCode === 13) { e.preventDefault(); runRosubSearch(); } };
+    var letters = 'abcdefghijklmnopqrstuvwxyz1234567890';
+    var typeKey = function (label, cls, fn) {
+      var k = el('button', 'ml-key f' + (cls ? ' ' + cls : ''), label);
+      k.type = 'button';
+      k.onclick = fn;
+      keys.appendChild(k);
+      if (TV && !keys.mlDefault) { addClass(k, 'ml-default'); keys.mlDefault = true; }
+      return k;
+    };
+    for (var i = 0; i < letters.length; i++) {
+      (function (ch) { typeKey(ch.toUpperCase(), '', function () { input.value += ch; }); })(letters.charAt(i));
+    }
+    typeKey(t('space'), 'wide', function () { input.value += ' '; });
+    typeKey(t('del'), 'wide', function () { input.value = input.value.slice(0, -1); });
+    typeKey(t('clear'), 'wide', function () { input.value = ''; });
+  }
+
+  function openRosub() {
+    var state = P;
+    if (!state || state.live) return;
+    ensureRosub(function (r) {
+      if (P !== state) return;
+      if (!r.enabled) { toast(t('rosubUnavailable')); return; }
+      buildRosubBox();
+      var box = $('mlRosub');
+      $('mlRosubTitle').textContent = t('rosubTitle');
+      var input = $('mlRosubInput');
+      // Textul initial: titlul curent (cu anul); ramane atasat de acest titlu pana il schimba utilizatorul.
+      if (input.mlFor !== state.id) {
+        var name = state.item ? (state.item.Name || '') : '';
+        var year = state.item && state.item.ProductionYear ? state.item.ProductionYear : 0;
+        input.value = name + (year && name.indexOf('(' + year + ')') < 0 ? ' (' + year + ')' : '');
+        input.mlFor = state.id;
+      }
+      $('mlRosubGo').textContent = t('search');
+      var list = $('mlRosubList');
+      list.textContent = '';
+      list.appendChild(el('p', 'ml-empty', t('rosubHint')));
+      box.mlReturn = document.activeElement;
+      removeClass(box, 'hidden');
+      clearTimeout(osdTimer);
+      // Pe televizor focusul pleaca pe tastatura virtuala (ca la cautare); pe desktop, in caseta textului.
+      var firstKey = $('mlRosubKeys').querySelector('.f');
+      if (TV && firstKey) focusEl(firstKey);
+      else anchorFocus(box, input);
+      runRosubSearch();
+    });
+  }
+
+  function closeRosub() {
+    var box = $('mlRosub');
+    if (hasClass(box, 'hidden')) return;
+    addClass(box, 'hidden');
+    if (!P) return;
+    showOsd();
+    restoreOsdFocus($('mlSubsBtn'));
+  }
+
+  // Cautarea propriu-zisa e dupa idul titlului (IMDb/TMDB) pe server; textul din caseta se trimite pentru
+  // servere viitoare/ajustari, iar utilizatorul o vede si o poate corecta inainte de o noua incercare.
+  function runRosubSearch() {
+    var state = P;
+    if (!state || hasClass($('mlRosub'), 'hidden')) return;
+    var list = $('mlRosubList');
+    list.textContent = '';
+    list.appendChild(el('p', 'ml-empty', t('rosubSearching')));
+    api('GET', '/MediaLabTv/Rosub/Search?itemId=' + enc(state.id) + '&q=' + enc($('mlRosubInput').value), null, function (status, data) {
+      if (P !== state || hasClass($('mlRosub'), 'hidden')) return;
+      list.textContent = '';
+      if (status === 409) { list.appendChild(el('p', 'ml-empty', t('rosubUnavailable'))); return; }
+      if (status !== 200 || !data || !data.Items || !data.Items.length) {
+        list.appendChild(el('p', 'ml-empty', status === 502 ? t('rosubUnavailable') : t('rosubEmpty')));
+        return;
+      }
+      for (var i = 0; i < data.Items.length; i++) (function (item) {
+        var label = item.Title || t('rosubTitle');
+        if (item.Year) label += ' (' + item.Year + ')';
+        if (item.Translator) label += ' — ' + item.Translator;
+        var b = el('button', 'ml-track-opt f', label);
+        b.type = 'button';
+        b.onclick = function () { downloadRosub(item); };
+        list.appendChild(b);
+      })(data.Items[i]);
+      var first = list.querySelector('.f');
+      if (first) focusEl(first);
+    });
+  }
+
+  // Descarca .srt-ul prin controller-ul pluginului (cheia API ramane pe server) si il ataseaza ca <track>.
+  function downloadRosub(item) {
+    var state = P;
+    if (!state) return;
+    var list = $('mlRosubList');
+    list.textContent = '';
+    list.appendChild(el('p', 'ml-empty', t('rosubDownloading')));
+    downloadText('/MediaLabTv/Rosub/Download?itemId=' + enc(state.id) + '&subtitleId=' + enc(item.Id), function (status, text) {
+      if (P !== state) return;
+      if (status !== 200 || !text) {
+        list.textContent = '';
+        list.appendChild(el('p', 'ml-empty', status === 409 || status === 502 ? t('rosubUnavailable') : t('rosubFailed')));
+        return;
+      }
+      removeExtSub(state);
+      var blob;
+      try { blob = new Blob([text], { type: 'text/plain' }); } catch (e) { blob = new Blob([text]); }
+      state.ext = { label: t('rosubExt', item.Title || t('rosubTitle')), url: URL.createObjectURL(blob), lang: item.Language || 'ro' };
+      state.extOn = true;
+      appendExtTrack(state.ext);
+      selectSubtitle(state.subtitle);
+      fillTracks(state);
+      closeRosub();
+      toast(t('rosubLoaded'));
+      report('progress');
+    });
+  }
+
+  // GET cu raspuns brut (nu JSON): continutul .srt, cu tokenul utilizatorului.
+  function downloadText(path, done) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', API + path, true);
+    xhr.timeout = 30000;
+    authHeaders(xhr, S.token);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) return;
+      done(xhr.status, xhr.responseText);
+    };
+    xhr.send(null);
   }
 
   // --- Selectorul de canale (TV in direct) --------------------------------------------------------
@@ -3185,25 +3397,32 @@
     var listEl = $('mlChapList');
     listEl.textContent = '';
     var dur = state.duration ? state.duration / TICKS : 0;
+    var now = position() / TICKS;
+    var focus = null;
+    var n = 0;
     for (var i = 0; i < list.length; i++) (function (ch) {
       var secs = ch.StartPositionTicks / TICKS;
-      var label = ch.Name || t('chapter', i + 1);
       if (dur && secs >= dur - 2) return;
-      var row = el('button', 'ml-chan-row f', label);
-      row.type = 'button';
-      row.appendChild(el('span', 'ml-chap-time', duration(secs)));
-      row.onclick = function () {
-        closeChapters();
-        seekTo(secs);
-        showOsd();
-      };
-      listEl.appendChild(row);
+      var card = el('button', 'ml-chap-card f' + (secs <= now ? ' on' : ''));
+      card.type = 'button';
+      card.setAttribute('role', 'option');
+      var img = el('span', 'ml-chap-img');
+      var idx = ch._mlIndex === undefined ? i : ch._mlIndex;
+      img.style.backgroundImage = 'url("' + imageUrl(state.id, 'Chapter', 360, null, idx) + '")';
+      card.appendChild(img);
+      card.appendChild(el('span', 'ml-chap-name', ch.Name || t('chapter', n + 1)));
+      card.appendChild(el('span', 'ml-chap-time', duration(secs)));
+      card.onclick = function () { closeChapters(); seekTo(secs); showOsd(); };
+      listEl.appendChild(card);
+      if (!focus && secs > now) { focus = card; }
+      n++;
     })(list[i]);
     $('mlChapTitle').textContent = t('chapters');
     box.mlReturn = document.activeElement;
     removeClass(box, 'hidden');
     clearTimeout(osdTimer);
-    anchorFocus(box, $('mlChapBtn'));
+    focusEl(focus || listEl.firstChild || $('mlChapBtn'));
+    try { (document.activeElement || listEl.firstChild).scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { }
   }
 
   function closeChapters() {
@@ -3276,6 +3495,15 @@
       restartAt(state, pos, index, state.subtitle);
       return;
     }
+    if (index === EXT_SUB) {
+      if (!state.ext) return;
+      state.extOn = true;
+      selectSubtitle(state.subtitle);
+      fillTracks(state);
+      report('progress');
+      return;
+    }
+    state.extOn = false;
     var stream = null;
     var streams = state.source.MediaStreams || [];
     for (var i = 0; i < streams.length; i++) if (streams[i].Index === index) stream = streams[i];
@@ -3310,8 +3538,11 @@
 
   function selectSubtitle(index) {
     var tracks = $('mlVideo').querySelectorAll('track');
+    // Cu subtitrarea rosub activa, doar pista ei (data-index=ml-ext) se arata; altfel mecanismul obisnuit.
+    var ext = P && P.extOn && P.ext;
     for (var i = 0; i < tracks.length; i++) {
-      var on = parseInt(tracks[i].getAttribute('data-index'), 10) === index;
+      var di = tracks[i].getAttribute('data-index');
+      var on = ext ? di === EXT_SUB : (di !== EXT_SUB && parseInt(di, 10) === index);
       if (tracks[i].track) tracks[i].track.mode = on ? 'showing' : 'disabled';
     }
   }
@@ -3355,6 +3586,10 @@
       if (k === 37 || k === 39) return true;
       return false;
     }
+    if (!hasClass($('mlRosub'), 'hidden')) {
+      if (k === 37 || k === 39) return true;
+      return false;
+    }
     var active = document.activeElement;
     var skipFocused = active === $('mlSkip') && !hasClass($('mlSkip'), 'hidden');
     if (!osdVisible()) {
@@ -3372,6 +3607,11 @@
       }
       if (k === 40) { if (S.osdLock) return true; showOsd(); focusEl(visible($('mlBar')) ? $('mlBar') : $('mlPlayPause')); return true; }
       return false;
+    }
+    // Jos: primul apas arata OSD-ul (ramura de mai sus), al doilea deschide filmstrip-ul capitolelor.
+    if (k === 40 && !P.live && hasClass($('mlChapBox'), 'hidden') && chaptersOf(P).length) {
+      openChapters();
+      return true;
     }
     scheduleOsdHide();
     // Derularea continua cat timp tasta e tinuta (OSD-ul a aparut chiar din derulare) sau focusul e pe bara.

@@ -48,7 +48,7 @@
     <div class="ml-osd-bottom">
       <div class="ml-osd-seek">
         <button type="button" class="f ml-osd-bar" id="mlBar"><span id="mlBarFill"></span><i id="mlBarBuf"></i><b class="ml-seekhint hidden" id="mlSeekHint"></b></button>
-        <div class="ml-osd-time"><span id="mlTimePos">0:00</span> / <span id="mlTimeDur">0:00</span></div>
+        <div class="ml-osd-time"><span id="mlTimePos">0:00</span><span class="ml-osd-time-sep">/</span><span id="mlTimeDur">0:00</span></div>
       </div>
       <div class="ml-osd-buttons" id="mlOsdButtons">
         <button type="button" class="f ml-btn round" id="mlPlayPause"><span class="ml-i-pause" id="mlPPIcon" aria-hidden="true"></span><span class="ml-sr" data-i18n="playPause"></span></button>
@@ -66,8 +66,12 @@
     </div>
   </div>
   <div class="ml-tracks hidden" id="mlTracks"><h3 id="mlTracksTitle"></h3><div id="mlTracksList"></div></div>
+  <div class="ml-tracks ml-rosub hidden" id="mlRosub"><h3 id="mlRosubTitle"></h3>
+    <div class="ml-rosub-search"><input type="text" id="mlRosubInput" autocomplete="off" autocorrect="off" spellcheck="false"><button type="button" class="f ml-btn primary" id="mlRosubGo"></button></div>
+    <div class="ml-rosub-cols"><div class="ml-keys" id="mlRosubKeys"></div><div class="ml-rosub-list" id="mlRosubList"></div></div>
+  </div>
   <div class="ml-chanbox hidden" id="mlChanBox"><h3 id="mlChanTitle"></h3><div class="ml-chan-list" id="mlChanList"></div></div>
-  <div class="ml-chanbox hidden" id="mlChapBox"><h3 id="mlChapTitle"></h3><div class="ml-chan-list" id="mlChapList"></div></div>
+  <div class="ml-chapbox hidden" id="mlChapBox"><h3 id="mlChapTitle"></h3><div class="ml-chap-strip" id="mlChapList"></div></div>
   <div class="ml-vol hidden" id="mlVol"><span class="ml-vol-label" id="mlVolLabel"></span><span class="ml-vol-track"><i id="mlVolFill"></i></span><b class="ml-vol-pct" id="mlVolPct"></b></div>
   <button type="button" class="f ml-skip hidden" id="mlSkip"></button>
   <p class="ml-play-error hidden" id="mlPlayError"></p>

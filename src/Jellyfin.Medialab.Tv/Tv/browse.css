@@ -125,6 +125,11 @@ html .ml-btn:focus { outline: none; -webkit-transform: scale(1.06); transform: s
 .ml-card:focus { outline: none; -webkit-transform: scale(1.1); transform: scale(1.1); z-index: 5; }
 .ml-card:focus .ml-img { outline: 0.167rem solid #e50914; box-shadow: 0 0.444rem 1.333rem rgba(0,0,0,.7); }
 .ml-card:first-child:focus { -webkit-transform-origin: left center; transform-origin: left center; }
+/* Rollover cu mouseul: aceeasi ridicare discreta ca la focusul telecomenzii (pe desktop). */
+.ml-card:hover { outline: none; -webkit-transform: scale(1.1); transform: scale(1.1); z-index: 5; }
+.ml-card:hover .ml-img { outline: 0.167rem solid #e50914; box-shadow: 0 0.444rem 1.333rem rgba(0,0,0,.7); }
+.ml-card:first-child:hover { -webkit-transform-origin: left center; transform-origin: left center; }
+.ml-card.poster:hover .ml-cap { opacity: 1; }
 .ml-card .ml-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.444rem 0.556rem 0.444rem; background-image: linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,0)); color: #fff; font-size: 0.833rem; font-weight: 700; line-height: 1.2; }
 .ml-card .ml-cap small { display: block; font-weight: 400; color: #ccc; font-size: 0.722rem; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ml-card .ml-cap span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -133,7 +138,7 @@ html .ml-btn:focus { outline: none; -webkit-transform: scale(1.06); transform: s
 .ml-card .ml-badge { position: absolute; top: 0.333rem; right: 0.333rem; padding: 2px 0.333rem; border-radius: 0.167rem; background: rgba(0,0,0,.7); color: #fff; font-size: 0.667rem; font-weight: 700; }
 .ml-card .ml-badge.live { background: #e50914; }
 .ml-progress { position: absolute; left: 0.556rem; right: 0.556rem; bottom: 0.333rem; height: 0.222rem; background: rgba(255,255,255,.3); border-radius: 2px; overflow: hidden; }
-.ml-progress span { display: block; height: 100%; background: #e50914; }
+.ml-progress span { display: block; height: 100%; background: #e50914; background: var(--ml-progress, #e50914); }
 .ml-card.has-progress .ml-cap { padding-bottom: 0.889rem; }
 .ml-card.genre .ml-img { background-image: linear-gradient(135deg, #3a3a3a, #1c1c1c); }
 .ml-card.genre .ml-cap { top: 0; display: flex; align-items: flex-end; font-size: 1.111rem; background: none; }
@@ -204,7 +209,7 @@ html .ml-btn:focus { outline: none; -webkit-transform: scale(1.06); transform: s
 .ml-osd-bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 3.889rem 2.222rem 1.444rem; background-image: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,0)); }
 .ml-osd-seek { display: flex; align-items: center; margin-bottom: 0.889rem; }
 .ml-osd-bar { position: relative; flex: 1; height: 0.333rem; padding: 0; border: 0; border-radius: 0.167rem; background: rgba(255,255,255,.3); cursor: pointer; }
-.ml-osd-bar span { position: absolute; left: 0; top: 0; bottom: 0; background: #e50914; border-radius: 0.167rem; z-index: 2; }
+.ml-osd-bar span { position: absolute; left: 0; top: 0; bottom: 0; background: #e50914; background: var(--ml-progress, #e50914); border-radius: 0.167rem; z-index: 2; }
 .ml-osd-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(255,255,255,.35); border-radius: 0.167rem; }
 .ml-osd-bar:focus { outline: none; height: 0.556rem; box-shadow: 0 0 0 0.167rem rgba(255,255,255,.6); }
 .ml-osd-time { margin-left: 1rem; color: #ddd; font-size: 0.944rem; white-space: nowrap; }
@@ -235,7 +240,7 @@ html .ml-btn:focus { outline: none; -webkit-transform: scale(1.06); transform: s
 .ml-vol { position: absolute; top: 6vh; right: 5vw; z-index: 5; display: flex; align-items: center; padding: 0.556rem 0.889rem; border-radius: 0.333rem; background: rgba(20,20,20,.92); }
 .ml-vol-label { font-size: 0.778rem; color: #bcbcbc; margin-right: 0.556rem; white-space: nowrap; }
 .ml-vol-track { position: relative; width: 7rem; height: 0.333rem; border-radius: 0.167rem; background: rgba(255,255,255,.3); overflow: hidden; }
-.ml-vol-track i { display: block; height: 100%; background: #e50914; }
+.ml-vol-track i { display: block; height: 100%; background: #e50914; background: var(--ml-progress, #e50914); }
 .ml-vol-pct { min-width: 2.6em; margin-left: 0.556rem; color: #fff; font-size: 0.889rem; }
 .ml-i-lock { display: inline-block; position: relative; width: 0.778rem; height: 0.611rem; border: 0.139rem solid currentColor; border-radius: 0.111rem; vertical-align: middle; }
 .ml-i-lock:before { content: ""; position: absolute; left: 0.139rem; top: -0.5rem; width: 0.361rem; height: 0.361rem; border: 0.139rem solid currentColor; border-bottom: 0; border-radius: 0.361rem 0.361rem 0 0; }
@@ -246,10 +251,22 @@ html .ml-btn:focus { outline: none; -webkit-transform: scale(1.06); transform: s
 .ml-track-opt.on { color: #fff; font-weight: 700; }
 .ml-track-opt.on:before { content: "\2713"; position: absolute; left: 0.556rem; }
 .ml-track-opt:focus { outline: none; background: #333; color: #fff; }
+/* „Descarcă de pe rosub”: caseta de cautare (aceeasi baza ca panoul de piste). */
+.ml-rosub { width: 34rem; max-height: 66vh; overflow: visible; }
+.ml-rosub-search { display: flex; align-items: center; gap: 0.444rem; margin-bottom: 0.667rem; }
+.ml-rosub-search input { flex: 1; min-width: 0; padding: 0.444rem 0.667rem; font-size: 1rem; background: #000; border: 1px solid #777; color: #fff; border-radius: 0.167rem; }
+.ml-rosub-search input:focus { outline: none; border-color: #fff; }
+.ml-rosub-cols { display: flex; align-items: flex-start; }
+.ml-rosub-cols .ml-keys { flex: 0 0 auto; width: 15.5rem; margin: 0 1rem 0 0; }
+.ml-rosub-cols .ml-key { width: 2.2rem; height: 2rem; font-size: 0.889rem; }
+.ml-rosub-cols .ml-key.wide { width: 4.6rem; }
+.ml-rosub-list { flex: 1; min-width: 0; max-height: 42vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+.ml-rosub-list::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.ml-rosub-list .ml-track-opt { padding-left: 0.667rem; }
 .ml-skip { position: absolute; right: 2.667rem; bottom: 8.333rem; padding: 0.778rem 1.444rem; border: 2px solid #fff; border-radius: 0.222rem; background: rgba(0,0,0,.6); color: #fff; font-size: 1.111rem; font-weight: 700; cursor: pointer; z-index: 3; }
 .ml-skip:focus { background: #fff; color: #000; outline: none; }
 .ml-play-error { position: absolute; left: 0; right: 0; top: 45%; text-align: center; color: #fff; font-size: 1.222rem; padding: 0 1.333rem; }
-.ml-spinner { position: absolute; left: 50%; top: 50%; width: 3.111rem; height: 3.111rem; margin: -1.556rem 0 0 -1.556rem; border: 0.278rem solid rgba(255,255,255,.2); border-top-color: #e50914; border-radius: 50%; -webkit-animation: ml-spin 1s linear infinite; animation: ml-spin 1s linear infinite; }
+.ml-spinner { position: absolute; left: 50%; top: 50%; width: 3.111rem; height: 3.111rem; margin: -1.556rem 0 0 -1.556rem; border: 0.278rem solid rgba(255,255,255,.2); border-top-color: #e50914; border-top-color: var(--ml-progress, #e50914); border-radius: 50%; -webkit-animation: ml-spin 1s linear infinite; animation: ml-spin 1s linear infinite; }
 @-webkit-keyframes ml-spin { to { -webkit-transform: rotate(360deg); } }
 @keyframes ml-spin { to { transform: rotate(360deg); } }
 video::cue { font-size: 1.444rem; background: rgba(0,0,0,.6); }
@@ -364,3 +381,65 @@ html.ml-tv .ml-seekhint { display: block; }
 .ml-dialog-box .ml-buttons { justify-content: center; }
 /* Subtitrarile urca deasupra OSD-ului cand acesta e vizibil. */
 .ml-player.osd-on video::-webkit-media-text-track-container { -webkit-transform: translateY(-6rem); transform: translateY(-6rem); }
+
+
+/* --- OSD: capitole orizontale cu miniaturi, fara scrollbar vertical ------------------------------- */
+.ml-chapbox { position: absolute; left: 0; right: 0; bottom: 9rem; z-index: 5; padding: 0 2.222rem;
+  background-image: linear-gradient(to top, rgba(0,0,0,.92), rgba(0,0,0,.55) 60%, rgba(0,0,0,0)); }
+.ml-chapbox h3 { margin: 0 0 .55rem; color: #fff; font-size: 1rem; font-weight: 600; letter-spacing: .02em; }
+.ml-chap-strip { display: flex; gap: .8rem; overflow-x: auto; overflow-y: hidden; padding: .2rem .2rem 1.1rem;
+  scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
+.ml-chap-strip::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.ml-chap-card { flex: 0 0 auto; width: 15rem; padding: 0; border: 0; background: transparent; color: #fff;
+  text-align: left; cursor: pointer; border-radius: .4rem; transition: transform .15s; }
+.ml-chap-card:focus { outline: none; transform: translateY(-2px); }
+.ml-chap-img { display: block; width: 100%; padding-top: 56.25%; border-radius: .4rem;
+  background: #2a2a2a center/cover no-repeat; outline: .16rem solid rgba(255,255,255,0); outline-offset: 0;
+  transition: outline-color .15s; box-shadow: 0 .3rem 1rem rgba(0,0,0,.35); }
+.ml-chap-card:focus .ml-chap-img { outline-color: #fff; }
+.ml-chap-card.on .ml-chap-img { outline-color: #e50914; }
+.ml-chap-name { display: block; margin-top: .45rem; font-size: .9rem; color: #cfcfcf;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ml-chap-card:focus .ml-chap-name { color: #fff; }
+.ml-chap-time { display: block; font-size: .78rem; color: #9a9a9a; margin-top: .1rem; }
+
+/* OSD: nicio bara de derulare vizibila (liste care se deruleaza totusi cu focusul) */
+.ml-tracks, .ml-chanbox { scrollbar-width: none; -ms-overflow-style: none; }
+.ml-tracks::-webkit-scrollbar, .ml-chanbox::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Bara de progres: partea vazuta (accent) vs cea ramasa (gri) vs buffer (gri deschis) + cursor */
+.ml-osd-bar { background: rgba(255,255,255,.22); }
+.ml-osd-bar i { background: rgba(255,255,255,.45); }
+.ml-osd-bar span { background: #e50914; background: var(--ml-progress, #e50914); }
+.ml-osd-bar span::after { content: ''; position: absolute; right: -.32rem; top: 50%; width: .64rem; height: .64rem;
+  margin-top: -.32rem; border-radius: 50%; background: #fff; box-shadow: 0 0 0 .12rem rgba(0,0,0,.45); }
+.ml-osd-bar:focus span::after { transform: scale(1.15); }
+.ml-bar-ticks { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 3; pointer-events: none; }
+.ml-bar-ticks i { position: absolute; top: -0.18rem; bottom: -0.18rem; width: .1rem; background: rgba(255,255,255,.75); border-radius: 1px; }
+
+/* --- OSD modern: panou de piste, timp, butoane ------------------------------------------------ */
+.ml-tracks { width: 22rem; max-width: 86vw; max-height: 60vh; padding: 1rem 1rem .7rem; border-radius: .6rem;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(18,18,18,.96); box-shadow: 0 1rem 3rem rgba(0,0,0,.55);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.ml-tracks h3 { margin: 0 0 .6rem; padding: 0 .2rem; color: #fff; font-size: .86rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .09em; opacity: .75; }
+.ml-track-opt { padding: .62rem .9rem .62rem 2.1rem; color: #d6d6d6; font-size: .98rem; border-radius: .4rem; }
+.ml-track-opt.on { color: #fff; }
+.ml-track-opt.on:before { left: .8rem; color: #fff; font-weight: 700; }
+.ml-track-opt:hover { background: rgba(255,255,255,.08); }
+.ml-track-opt:focus { outline: none; background: rgba(255,255,255,.16); color: #fff;
+  box-shadow: inset 0 0 0 .12rem #fff; }
+.ml-osd-time { display: flex; align-items: baseline; gap: .45rem; margin-left: 1.1rem; font-variant-numeric: tabular-nums; }
+.ml-osd-time #mlTimePos { color: #fff; font-weight: 600; }
+.ml-osd-time #mlTimeDur { color: rgba(255,255,255,.6); }
+.ml-osd-bottom .ml-btn.ghost { background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.28); font-weight: 500; }
+.ml-osd-bottom .ml-btn.ghost.on { background: #fff; color: #000; border-color: #fff; }
+.ml-osd-bottom .ml-btn.round { background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.28); }
+
+.ml-osd-time-sep { color: rgba(255,255,255,.38); }
+
+/* Miscare redusa (preferinta de sistem): fara tranzitii si animatii. */
+@media (prefers-reduced-motion: reduce) {
+  .ml-card, .ml-btn, .ml-profile .ml-avatar, .ml-hero-img, .ml-osd, html.ml-tv .ml-track-in { -webkit-transition: none !important; transition: none !important; }
+  .ml-spinner { -webkit-animation: none !important; animation: none !important; border-top-color: rgba(255,255,255,.2); }
+}
